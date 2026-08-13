@@ -1,0 +1,36 @@
+{
+  "name": "dsh-entity-dd",
+  "version": "0.0.1",
+  "description": "Cross-border counterparty due diligence for DeepSeek Harness — resolve the entity you are actually contracting with, then judge whether the record is fit to rely on.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "due-diligence",
+    "lei",
+    "gleif",
+    "kyc"
+  ],
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "lib/",
+    "rules/",
+    "cordis.patch.yml"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/cordis": "^4.0.1"
+  }
+}

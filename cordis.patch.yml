@@ -1,0 +1,6 @@
+# The bundle layer contributed by dsh-entity-dd.
+# A profile that lists this bundle gets the row below inserted over its base.
+# Users can override this row by id from their own profile cordis.patch.yml.
+- insert:
+    - id: entity-dd
+      name: dsh-entity-dd
