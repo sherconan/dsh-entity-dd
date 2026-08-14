@@ -4,6 +4,11 @@ import { formatCandidates } from './lib/format.js'
 import { buildDossier } from './lib/dossier.js'
 import { checkVat } from './lib/vies.js'
 import { countryName } from './lib/countries.js'
+import {
+  presentSearchCall, presentSearchResult,
+  presentDossierCall, presentDossierResult,
+  presentVatCall, presentVatResult,
+} from './lib/present.js'
 
 export const name = 'entity-dd'
 export const inject = ['tools']
@@ -39,6 +44,8 @@ export function apply(ctx) {
     async execute(args) {
       return formatCandidates(args.name, await searchEntities(args.name, args.country))
     },
+    presentCall: presentSearchCall,
+    presentResult: presentSearchResult,
   }))
 
   // ---- 2. Judge whether that entity's record may be relied on -------------
@@ -70,6 +77,8 @@ export function apply(ctx) {
     async execute(args) {
       return buildDossier(args.lei, { vat: args.vat })
     },
+    presentCall: presentDossierCall,
+    presentResult: presentDossierResult,
   }))
 
   // ---- 3. The fallback when the entity has no LEI at all ------------------
@@ -127,5 +136,7 @@ export function apply(ctx) {
           return `${head} — ⚠️ 核验未完成\n${result.detail}\n请如实告知用户，不要据此做出任何判断。`
       }
     },
+    presentCall: presentVatCall,
+    presentResult: presentVatResult,
   }))
 }
