@@ -1,0 +1,155 @@
+{
+  "version": "1",
+  "updated": "2026-08-14",
+  "disclaimer": "以下为登记信息层面的启发式提示，用于提醒人工复核，不构成合规结论或法律意见。规则可自行增删修改：每条 when 条件对照一个事实字段，满足即触发。",
+  "levels": {
+    "red": "阻断性问题，不应在未澄清前推进",
+    "amber": "需人工复核，或需要对方补充材料",
+    "info": "背景提示，不必然是问题"
+  },
+  "facts": {
+    "entityStatus": "登记库中该法人的存续状态",
+    "recordStatus": "该法人全球身份登记记录的维护状态",
+    "recordAgeYears": "记录距今多少年未更新",
+    "renewalOverdueYears": "登记续期逾期多少年",
+    "country": "注册地国别代码",
+    "isOffshore": "是否注册于常见离岸法域",
+    "registeredAs": "本国商业登记号",
+    "hasDirectParent": "登记库中是否记录了直接母公司",
+    "parentCountry": "直接母公司注册地国别代码",
+    "parentIsOffshore": "直接母公司是否注册于离岸法域",
+    "parentCountryDiffers": "母公司与本主体是否分属不同国家",
+    "addressLooksLikeAgent": "注册地址是否呈现代收/代理/信箱特征"
+  },
+  "rules": [
+    {
+      "id": "entity-terminated",
+      "level": "red",
+      "dimension": "data",
+      "when": {
+        "field": "entityStatus",
+        "op": "in",
+        "value": [
+          "INACTIVE",
+          "RETIRED",
+          "NULL"
+        ]
+      },
+      "label": "主体已失效",
+      "finding": "登记显示该法人已注销、被合并或以其他方式终止存续。",
+      "advice": "不可作为签约对手。若对方仍以此名义洽谈，须立即核实其现行主体并要求出具变更证明。"
+    },
+    {
+      "id": "record-lapsed",
+      "level": "amber",
+      "dimension": "data",
+      "when": {
+        "field": "recordStatus",
+        "op": "in",
+        "value": [
+          "LAPSED",
+          "RETIRED",
+          "ANNULLED",
+          "DUPLICATE"
+        ]
+      },
+      "suppresses": [
+        "record-stale",
+        "renewal-overdue"
+      ],
+      "label": "档案陈旧",
+      "finding": "主体本身可能仍在正常经营，但其全球身份登记已失效，记录不再被维护；名称、地址、股东等字段均可能已变更。",
+      "advice": "要求对方提供近 6 个月内的商业登记摘录原件，以档案中的本国登记号逐项核对。"
+    },
+    {
+      "id": "record-stale",
+      "level": "amber",
+      "dimension": "data",
+      "when": {
+        "field": "recordAgeYears",
+        "op": "gt",
+        "value": 1.5
+      },
+      "label": "更新滞后",
+      "finding": "记录已超过一年半未更新，关键字段可能已过期。",
+      "advice": "涉及签约、付款或授信时，要求对方提供近期登记证明交叉核对。"
+    },
+    {
+      "id": "renewal-overdue",
+      "level": "amber",
+      "dimension": "data",
+      "when": {
+        "field": "renewalOverdueYears",
+        "op": "gt",
+        "value": 0
+      },
+      "label": "登记续期逾期",
+      "finding": "该登记的应续期日期已过，但未见续期记录。",
+      "advice": "视同档案陈旧处理，以对方提供的近期登记材料为准。"
+    },
+    {
+      "id": "offshore-registration",
+      "level": "amber",
+      "dimension": "business",
+      "when": {
+        "field": "isOffshore",
+        "op": "isTrue"
+      },
+      "label": "注册于离岸法域",
+      "finding": "该主体注册于常见的离岸法域，此类主体通常为控股或贸易通道，未必拥有实际生产经营资产。",
+      "advice": "确认其是否为履约主体。若履约方另有其人，应要求实际经营主体共同签约或提供担保。"
+    },
+    {
+      "id": "parent-offshore",
+      "level": "amber",
+      "dimension": "business",
+      "when": {
+        "field": "parentIsOffshore",
+        "op": "isTrue"
+      },
+      "label": "母公司位于离岸法域",
+      "finding": "其直接母公司注册于离岸法域，实际控制人可能不在登记信息可见范围内。",
+      "advice": "涉及大额交易或授信时，追溯至最终受益人，并核实制裁与出口管制风险。"
+    },
+    {
+      "id": "parent-third-country",
+      "level": "info",
+      "dimension": "business",
+      "when": {
+        "field": "parentCountryDiffers",
+        "op": "isTrue"
+      },
+      "label": "母公司在另一法域",
+      "finding": "母公司与本主体分属不同国家，集团内部的责任与资金安排未必与注册地一致。",
+      "advice": "明确合同责任主体与最终付款方是否为同一法人。"
+    },
+    {
+      "id": "agent-address",
+      "level": "amber",
+      "dimension": "business",
+      "when": {
+        "field": "addressLooksLikeAgent",
+        "op": "isTrue"
+      },
+      "label": "注册地址呈代理特征",
+      "finding": "注册地址包含代收、信箱或代理机构特征，可能并非实际经营场所。",
+      "advice": "索取实际经营地址与现场照片，必要时安排第三方验厂。"
+    },
+    {
+      "id": "no-national-number",
+      "level": "info",
+      "dimension": "data",
+      "when": {
+        "field": "registeredAs",
+        "op": "isNull"
+      },
+      "label": "未提供本国登记号",
+      "finding": "该记录未登记本国商业登记号，无法据此回到当地登记机关核对。",
+      "advice": "直接向对方索取本国登记号或登记摘录。"
+    }
+  ],
+  "dimensions": {
+    "data": "数据本身的可靠性问题（记录陈旧、失效、缺失）——决定体检表的采信标记",
+    "business": "业务与结构风险（离岸、代理地址、跨法域控股）——不影响数据新鲜度"
+  }
+}
